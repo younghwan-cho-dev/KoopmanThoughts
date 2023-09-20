@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import combinations_with_replacement
 
 def centralDifference(arr, dt):
     arr_shifted_forward = shift_for_np(arr,1)
@@ -31,3 +32,34 @@ def func_generator(coef,poly,subset):
           dX = coef @ X.T
           return dX
      return func
+
+# Work in Progress
+# Need to check the logic works well
+def polynomial_features(X, degree):
+    n_samples, n_features = np.shape(X)
+
+    def index_combinations():
+        combs = [combinations_with_replacement(range(n_features), i) for i in range(0, degree + 1)]
+        flat_combs = [item for sublist in combs for item in sublist]
+        return flat_combs
+    
+    combinations = index_combinations()
+    n_output_features = len(combinations)
+    X_new = np.empty((n_samples, n_output_features))
+    
+    for i, index_combs in enumerate(combinations):  
+        X_new[:, i] = np.prod(X[:, index_combs], axis=1)
+
+    return X_new
+
+# Need to check the logic works well
+def standardize(X):
+    """ Standardize the dataset X """
+    X_std = X
+    mean = X.mean(axis=0)
+    std = X.std(axis=0)
+    for col in range(np.shape(X)[1]):
+        if std[col]:
+            X_std[:, col] = (X_std[:, col] - mean[col]) / std[col]
+    # X_std = (X - X.mean(axis=0)) / X.std(axis=0)
+    return X_std
